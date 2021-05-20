@@ -21,7 +21,7 @@ class Home extends StatelessWidget {
         centerTitle: true,
       ),
       body: RefreshIndicator(
-        onRefresh: () {},
+        onRefresh: () => null,
         child: ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.vertical,

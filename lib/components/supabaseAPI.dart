@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import '../models/movie.dart';
 
 const supabaseUrl = 'https://tedrfqhnhtkeswbyvcuu.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNDMxOTIyMiwiZXhwIjoxOTI5ODk1MjIyfQ.gWWL0dhjegysQ4EZFQcYLOg19iBea1OUfW3ucyi-Qp8';
+const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNDMxOTIyMiwiZXhwIjoxOTI5ODk1MjIyfQ.gWWL0dhjegysQ4EZFQcYLOg19iBea1OUfW3ucyi-Qp8';
 final supabaseClient = SupabaseClient(supabaseUrl, supabaseKey);
 
 class Controller extends GetxController {
@@ -48,18 +49,18 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
         ),
         body: TabBarView(
           children: <Widget>[
-            Read(),
-            Insert(),
-            Delete(),
-            Update(),
-            Realtime(),
+            read(),
+            insert(),
+            delete(),
+            update(),
+            realtime(),
           ],
         ),
       ),
     );
   }
 
-  Widget Read() {
+  Widget read() {
     return FutureBuilder<List<Movie>>(
       future: getMovies(),
       builder: (context, AsyncSnapshot<List<Movie>> snapshot) {
@@ -80,7 +81,7 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
     );
   } // Read Widget
 
-  Widget Insert() {
+  Widget insert() {
     TextEditingController _nameFieldController = TextEditingController();
     TextEditingController _descriptionFieldController = TextEditingController();
 
@@ -112,9 +113,10 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
             maxLines: 5,
           ),
           SizedBox(height: 8),
-          FlatButton(
+          TextButton(
             onPressed: () {
-              insertMovies(_nameFieldController.text, _descriptionFieldController.text);
+              insertMovies(
+                  _nameFieldController.text, _descriptionFieldController.text);
               _nameFieldController.text = "";
               _descriptionFieldController.text = "";
             },
@@ -125,14 +127,16 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            color: Colors.green,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget Delete() {
+  Widget delete() {
     TextEditingController _nameFieldController = new TextEditingController();
 
     return Padding(
@@ -153,7 +157,7 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
             maxLines: 1,
           ),
           SizedBox(height: 8),
-          FlatButton(
+          TextButton(
             onPressed: () {
               deleteMovies(_nameFieldController.text);
               _nameFieldController.text = "";
@@ -165,14 +169,16 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            color: Colors.red,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget Update() {
+  Widget update() {
     TextEditingController _nameFieldController = TextEditingController();
     TextEditingController _descriptionFieldController = TextEditingController();
 
@@ -204,9 +210,10 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
             maxLines: 5,
           ),
           SizedBox(height: 8),
-          FlatButton(
+          TextButton(
             onPressed: () {
-              updateMovies(_nameFieldController.text, _descriptionFieldController.text);
+              updateMovies(
+                  _nameFieldController.text, _descriptionFieldController.text);
               _nameFieldController.text = "";
               _descriptionFieldController.text = "";
             },
@@ -217,45 +224,52 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            color: Colors.pink,
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.pink,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget Realtime() {
+  Widget realtime() {
     final Controller controller = Get.put(Controller());
-    final Operation = [
+    final operation = [
       Icons.fingerprint,
       Icons.playlist_add,
       Icons.delete,
       Icons.update,
     ];
-    final OperationColor = [
-        Colors.black,
-        Colors.green,
-        Colors.red,
-        Colors.pink,
+    final operationColor = [
+      Colors.black,
+      Colors.green,
+      Colors.red,
+      Colors.pink,
     ];
 
-    final _response = supabaseClient.from('DummyTable').on(SupabaseEventTypes.insert, (payload) {
+    final _response = supabaseClient
+        .from('DummyTable')
+        .on(SupabaseEventTypes.insert, (payload) {
       controller.name.value = payload.newRecord['name'];
       controller.description.value = payload.newRecord['description'];
       controller.operation.value = 1;
     }).on(SupabaseEventTypes.delete, (payload) {
-      controller.operation.value = 2; // only id can be get in this case using oldRecord['id']
+      controller.operation.value =
+          2; // only id can be get in this case using oldRecord['id']
     }).on(SupabaseEventTypes.update, (payload) {
       controller.name.value = payload.newRecord['name'];
       controller.description.value = payload.newRecord['description'];
       controller.operation.value = 3;
     }).subscribe();
 
+    print(_response.isErrored());
+
     return Obx(
       () => ListTile(
         leading: Icon(
-          Operation[controller.operation.value],
-          color: OperationColor[controller.operation.value],
+          operation[controller.operation.value],
+          color: operationColor[controller.operation.value],
           size: 30.0,
         ),
         title: Text('${controller.name.string}'),
@@ -267,15 +281,19 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
   void updateMovies(String name, String description) async {
     final _response = await supabaseClient
         .from('DummyTable')
-        .update({
-          "description": description
-        })
+        .update({"description": description})
         .eq("name", name)
         .execute();
+    print(_response.error);
   }
 
   void deleteMovies(String name) async {
-    final _response = await supabaseClient.from('DummyTable').delete().eq("name", name).execute();
+    final _response = await supabaseClient
+        .from('DummyTable')
+        .delete()
+        .eq("name", name)
+        .execute();
+    print(_response.error);
   }
 
   void insertMovies(String name, String description) async {
@@ -285,10 +303,12 @@ class _SupabaseAPIState extends State<SupabaseAPI> {
         "description": description,
       }
     ]).execute();
+    print(_response.error);
   }
 
   Future<List<Movie>> getMovies() async {
-    final response = await supabaseClient.from('DummyTable').select('*').execute();
+    final response =
+        await supabaseClient.from('DummyTable').select('*').execute();
 
     final dataList = response.data as List;
     return dataList.map((map) => Movie.fromJson(map)).toList();

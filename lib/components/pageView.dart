@@ -8,6 +8,7 @@ class BasicPageView extends StatefulWidget {
 class _BasicPageViewState extends State<BasicPageView> {
   PageController pageController = new PageController(initialPage: 0);
   int _index = 0;
+  // ignore: non_constant_identifier_names
   final int max_pages = 3;
 
   @override
@@ -22,7 +23,9 @@ class _BasicPageViewState extends State<BasicPageView> {
               if (_index > 0) {
                 _index -= 1;
               }
-              pageController.animateToPage(_index, duration: Duration(milliseconds: 150), curve: Curves.easeInOut);
+              pageController.animateToPage(_index,
+                  duration: Duration(milliseconds: 150),
+                  curve: Curves.easeInOut);
             },
           ),
           IconButton(
@@ -31,7 +34,9 @@ class _BasicPageViewState extends State<BasicPageView> {
               if (_index < max_pages - 1) {
                 _index += 1;
               }
-              pageController.animateToPage(_index, duration: Duration(milliseconds: 150), curve: Curves.easeInOut);
+              pageController.animateToPage(_index,
+                  duration: Duration(milliseconds: 150),
+                  curve: Curves.easeInOut);
             },
           ),
         ],
